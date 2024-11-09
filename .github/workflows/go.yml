@@ -31,6 +31,7 @@ jobs:
         OUTPUT_NAME=myapp-${{ matrix.os }}-${{ matrix.arch }}
         if [[ $GOOS == "windows" ]]; then OUTPUT_NAME="${OUTPUT_NAME}.exe"; fi
         go build -ldflags="-extldflags=-no-pie" -o $OUTPUT_NAME
+        ls -al  # List files to ensure the built file exists
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
@@ -49,7 +50,7 @@ jobs:
         path: ./artifacts
 
     - name: List Artifacts
-      run: ls -al ./artifacts  # Optional step to verify artifacts exist
+      run: ls -al ./artifacts  # Check if artifacts are present
 
     - name: Create Release
       id: create_release

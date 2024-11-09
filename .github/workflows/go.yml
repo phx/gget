@@ -1,0 +1,69 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger only when pushing a version tag, e.g., v1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        arch: [amd64, arm64, 386]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.20  # Specify your Go version
+
+    - name: Build
+      run: |
+        GOOS=${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'windows-latest' && 'windows' || 'darwin' }}
+        GOARCH=${{ matrix.arch }}
+        OUTPUT_NAME=myapp-${{ matrix.os }}-${{ matrix.arch }}
+        if [[ $GOOS == "windows" ]]; then OUTPUT_NAME="${OUTPUT_NAME}.exe"; fi
+        go build -o $OUTPUT_NAME
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.os }}-${{ matrix.arch }}
+        path: myapp-${{ matrix.os }}-${{ matrix.arch }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: ./artifacts
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./artifacts/*
+        asset_name: ${{ matrix.os }}-${{ matrix.arch }}
+        content_type: application/octet-stream

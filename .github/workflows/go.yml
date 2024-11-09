@@ -35,8 +35,8 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{ matrix.os }}-${{ matrix.arch }}
-        path: myapp-${{ matrix.os }}-${{ matrix.arch }}
+        name: myapp-${{ matrix.os }}-${{ matrix.arch }}
+        path: ${{ matrix.os }}-${{ matrix.arch }}  # Ensure path matches OUTPUT_NAME
 
   release:
     needs: build
@@ -47,6 +47,9 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         path: ./artifacts
+
+    - name: List Artifacts
+      run: ls -al ./artifacts  # Optional step to verify artifacts exist
 
     - name: Create Release
       id: create_release

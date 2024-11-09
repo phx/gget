@@ -67,7 +67,9 @@ jobs:
       run: |
         for file in $(find ./artifacts -type f); do
           echo "Uploading $file"
-          gh release upload ${{ github.ref }} "$file" --clobber
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"$file" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$(basename $file)"
         done
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

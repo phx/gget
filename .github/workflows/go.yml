@@ -37,7 +37,8 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.os }}-${{ matrix.arch }}
-        path: gget-${{ matrix.os }}-${{ matrix.arch }}  # Ensure path matches OUTPUT_NAME
+        path: ${{ matrix.os }}-${{ matrix.arch }}*  # Match with .exe for Windows
+        if-no-files-found: warn
 
   release:
     needs: build
@@ -50,18 +51,18 @@ jobs:
         path: ./artifacts
 
     - name: List Artifacts
-      run: ls -al ./artifacts  # Check if artifacts are present
+      run: ls -alR ./artifacts  # Recursively list files to verify their presence
 
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Using the custom token (e.g., GH_TOKEN)
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+    with:
+      tag_name: ${{ github.ref }}
+      release_name: Release ${{ github.ref }}
+      draft: false
+      prerelease: false
 
     - name: Upload Release Assets
       run: |

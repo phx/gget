@@ -30,14 +30,14 @@ jobs:
         GOARCH=${{ matrix.arch }}
         OUTPUT_NAME=gget-${{ matrix.os }}-${{ matrix.arch }}
         if [[ $GOOS == "windows" ]]; then OUTPUT_NAME="${OUTPUT_NAME}.exe"; fi
-        go build -ldflags="-w -s -extldflags=-no-pie" -o $OUTPUT_NAME
+        go build -ldflags="-extldflags=-no-pie" -o $OUTPUT_NAME
         ls -al  # List files to ensure the built file exists
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{ matrix.os }}-${{ matrix.arch }}
-        path: ${{ matrix.os }}-${{ matrix.arch }}*  # Match with .exe for Windows
+        path: gget-${{ matrix.os }}-${{ matrix.arch }}*  # Match with .exe for Windows
         if-no-files-found: warn
 
   release:
@@ -58,11 +58,11 @@ jobs:
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Using the custom token (e.g., GH_TOKEN)
-    with:
-      tag_name: ${{ github.ref }}
-      release_name: Release ${{ github.ref }}
-      draft: false
-      prerelease: false
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
 
     - name: Upload Release Assets
       run: |
@@ -74,3 +74,5 @@ jobs:
             --data-binary @"$file" \
             "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=$(basename $file)"
         done
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}

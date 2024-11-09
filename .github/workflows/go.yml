@@ -28,7 +28,7 @@ jobs:
         export CGO_ENABLED=0  # Disable CGO for cross-compilation
         GOOS=${{ matrix.os == 'ubuntu-latest' && 'linux' || matrix.os == 'windows-latest' && 'windows' || 'darwin' }}
         GOARCH=${{ matrix.arch }}
-        OUTPUT_NAME=myapp-${{ matrix.os }}-${{ matrix.arch }}
+        OUTPUT_NAME=gget-${{ matrix.os }}-${{ matrix.arch }}
         if [[ $GOOS == "windows" ]]; then OUTPUT_NAME="${OUTPUT_NAME}.exe"; fi
         go build -ldflags="-extldflags=-no-pie" -o $OUTPUT_NAME
         ls -al  # List files to ensure the built file exists
@@ -36,8 +36,8 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: myapp-${{ matrix.os }}-${{ matrix.arch }}
-        path: ${{ matrix.os }}-${{ matrix.arch }}  # Ensure path matches OUTPUT_NAME
+        name: ${{ matrix.os }}-${{ matrix.arch }}
+        path: gget-${{ matrix.os }}-${{ matrix.arch }}  # Ensure path matches OUTPUT_NAME
 
   release:
     needs: build

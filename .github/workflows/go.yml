@@ -21,7 +21,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v4
       with:
-        go-version: 1.21.1  # Use a recent version of Go
+        go-version: 1.21.1  # Use a recent and stable version of Go
 
     - name: Build
       run: |
@@ -52,7 +52,7 @@ jobs:
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Using the custom token (e.g., GH_TOKEN)
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
@@ -67,4 +67,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./artifacts/*
         asset_name: ${{ matrix.os }}-${{ matrix.arch }}
-        content_type: application/octet-stream
+        asset_content_type: application/octet-stream
